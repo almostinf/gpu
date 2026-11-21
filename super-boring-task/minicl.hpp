@@ -63,6 +63,7 @@ cl_int clReleaseContext(cl_context);
 #define CL_MEM_READ_WRITE (1ULL<<0)
 #define CL_MEM_WRITE_ONLY (1ULL<<1)
 #define CL_MEM_READ_ONLY (1ULL<<2)
+#define CL_MEM_USE_HOST_PTR (1ULL<<3)
 #define CL_QUEUE_PROFILING_ENABLE (1ULL<<1)
 #define CL_PROGRAM_BUILD_LOG 0x1183
 #define CL_TRUE 1

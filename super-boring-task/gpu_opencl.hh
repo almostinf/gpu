@@ -39,6 +39,7 @@ class OpenCL {
     cl_context context_=nullptr;
     cl_command_queue queue_=nullptr;
     cl_program program_=nullptr;
+    std::string platform_name_;
 public:
     explicit OpenCL(const std::string& source) {
         try {
@@ -57,6 +58,7 @@ public:
             if(!device_)throw std::runtime_error("No compatible OpenCL devices");
             char platform_name[256]={},device_name[256]={};
             clGetPlatformInfo(platform_,CL_PLATFORM_NAME,sizeof(platform_name),platform_name,nullptr);
+            platform_name_=platform_name;
             clGetDeviceInfo(device_,CL_DEVICE_NAME,sizeof(device_name),device_name,nullptr);
             std::clog << "Platform name: " << platform_name << "\nDevice name: " << device_name << '\n';
             size_t max_wg=0;
@@ -82,6 +84,14 @@ public:
         cl_int err=CL_SUCCESS;
         cl_mem mem=clCreateBuffer(context_,CL_MEM_READ_WRITE,std::max<size_t>(bytes,1),nullptr,&err);
         cl_check(err,"clCreateBuffer"); return CLBuffer(mem);
+    }
+    bool is_apple() const {return platform_name_.find("Apple")!=std::string::npos;}
+    CLBuffer host_read_buffer(const void* data,size_t bytes){
+        cl_int err=CL_SUCCESS;
+        cl_mem mem=clCreateBuffer(context_,CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR,bytes,
+                                  const_cast<void*>(data),&err);
+        cl_check(err,"clCreateBuffer(CL_MEM_USE_HOST_PTR)");
+        return CLBuffer(mem);
     }
     CLKernel kernel(const char* name){
         cl_int err=CL_SUCCESS;cl_kernel k=clCreateKernel(program_,name,&err);cl_check(err,"clCreateKernel");return CLKernel(k);
